@@ -7,7 +7,7 @@ struct VaultEntry: Identifiable, Codable, FetchableRecord, PersistableRecord {
     var username: String
     var encryptedPassword: Data
     var url: String?
-    var matchWindowTitle: String?
+    var autoTypeSequence: String
     
     func getPassword() -> String? {
         return try? CryptoHelper.shared.decrypt(data: encryptedPassword)
@@ -35,14 +35,14 @@ class VaultManager {
                 t.column("username", .text).notNull()
                 t.column("encryptedPassword", .blob).notNull()
                 t.column("url", .text)
-                t.column("matchWindowTitle", .text)
+                t.column("autoTypeSequence", .text).notNull()
             }
         }
     }
     
-    func addEntry(title: String, username: String, passwordRaw: String, url: String?, matchWindowTitle: String?) throws {
+    func addEntry(title: String, username: String, passwordRaw: String, url: String?, autoTypeSequence: String) throws {
         let encryptedPass = try CryptoHelper.shared.encrypt(string: passwordRaw)
-        var entry = VaultEntry(title: title, username: username, encryptedPassword: encryptedPass, url: url, matchWindowTitle: matchWindowTitle)
+        var entry = VaultEntry(title: title, username: username, encryptedPassword: encryptedPass, url: url, autoTypeSequence: autoTypeSequence)
         try dbQueue.write { db in
             try entry.insert(db)
         }
@@ -51,13 +51,6 @@ class VaultManager {
     func fetchAll() throws -> [VaultEntry] {
         return try dbQueue.read { db in
             try VaultEntry.fetchAll(db)
-        }
-    }
-    
-    func findMatches(for windowTitle: String) throws -> [VaultEntry] {
-        return try dbQueue.read { db in
-            // Simple partial match using LIKE
-            try VaultEntry.filter(Column("matchWindowTitle").like("%\(windowTitle)%")).fetchAll(db)
         }
     }
 }

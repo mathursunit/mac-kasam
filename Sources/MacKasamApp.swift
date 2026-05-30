@@ -14,6 +14,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             _ = AccessibilityHelper.shared.checkAccessibilityPermissions()
         }
+        
+        // Handle initial unlock
+        if !SettingsManager.shared.useSimplePrompt, let token = KeychainHelper.shared.getToken() {
+            CryptoHelper.shared.unlockVault(password: token)
+        } else {
+            WindowManager.shared.showUnlock()
+        }
     }
 }
 
@@ -24,19 +31,17 @@ struct MacKasamApp: App {
     
     init() {
         _ = try? VaultManager.shared.setupDatabase()
-        // Temporary for testing:
-        CryptoHelper.shared.unlockVault(password: "password123")
-        if let entries = try? VaultManager.shared.fetchAll(), entries.isEmpty {
-            _ = try? VaultManager.shared.addEntry(title: "Test Server", username: "admin", passwordRaw: "secretPass", url: nil, matchWindowTitle: "TextEdit")
-        }
     }
     
     var body: some Scene {
         MenuBarExtra("MacKasam", systemImage: "lock.shield") {
             Button("Show Settings") {
-                // Implement settings later
+                WindowManager.shared.showSettings()
             }
             Divider()
+            Button("Lock Vault") {
+                WindowManager.shared.showUnlock()
+            }
             Button("Quit") {
                 NSApplication.shared.terminate(nil)
             }
