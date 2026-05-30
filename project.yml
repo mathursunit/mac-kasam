@@ -1,0 +1,14 @@
+name: MacKasam
+options:
+  bundleIdPrefix: com.sunitmathur
+targets:
+  MacKasam:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources: [Sources]
+    info:
+      path: Info.plist
+      properties:
+        NSPrincipalClass: NSApplication
+        LSUIElement: false
