@@ -51,6 +51,6 @@ class SpotlightWindowController: NSObject {
     
     func hide() {
         panel?.orderOut(nil)
-        // Don't auto-activate, let user manually click to perfectly replicate POC
+        previousApp?.activate(options: .activateIgnoringOtherApps)
     }
 }

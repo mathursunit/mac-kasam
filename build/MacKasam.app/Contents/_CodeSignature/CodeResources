@@ -158,10 +158,10 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			Jb4SqVr+1gs9MpbjyZ57LchmCmM=
+			v0UePRCniZiv2rPKon5DaMO48wg=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"25be12a95afed60b3d3296e3c99e7b2dc8660a63"</string>
+			<string>cdhash H"bf451e3d10a78998afdab3caa27e4368c3b8f308"</string>
 		</dict>
 		<key>MacOS/__preview.dylib</key>
 		<dict>

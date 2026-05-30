@@ -104,10 +104,17 @@ struct SpotlightSearchView: View {
     func triggerAutoType(_ entry: VaultEntry) {
         SpotlightWindowController.shared.hide()
         
-        let sequence = "admin{TAB}secretPass{ENTER}"
+        var pass = ""
+        do {
+            pass = try CryptoHelper.shared.decrypt(data: entry.encryptedPassword)
+        } catch {
+            pass = "DECRYPT_ERROR"
+        }
+        
+        let sequence = "\(entry.username){TAB}\(pass){ENTER}"
         
         DispatchQueue.global().async {
-            Thread.sleep(forTimeInterval: 3.0) // Wait 3 full seconds so user can manually click TextEdit
+            Thread.sleep(forTimeInterval: 1.5) // Wait for macOS to switch focus back to the target app
             KeystrokeSimulator.shared.typeSequence(sequence)
         }
     }

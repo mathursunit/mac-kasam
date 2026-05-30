@@ -42,6 +42,8 @@
 	<string>17F42</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>14.0</string>
+	<key>LSUIElement</key>
+	<false/>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>
