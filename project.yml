@@ -20,4 +20,5 @@ targets:
     info:
       path: Info.plist
       properties:
+        LSUIElement: false
         NSPrincipalClass: NSApplication

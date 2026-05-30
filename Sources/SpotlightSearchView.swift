@@ -1,10 +1,34 @@
 import SwiftUI
 import KeyboardShortcuts
 
+class SpotlightState: ObservableObject {
+    static let shared = SpotlightState()
+    @Published var detectedTitle: String = ""
+}
+
 struct SpotlightSearchView: View {
+    @StateObject private var state = SpotlightState.shared
     @State private var searchText = ""
-    @State private var results: [VaultEntry] = []
-    @State private var detectedTitle = ""
+    @State private var allEntries: [VaultEntry] = []
+    
+    var filteredResults: [VaultEntry] {
+        if searchText.isEmpty {
+            let matches = allEntries.filter { entry in
+                guard let matchStr = entry.matchWindowTitle, !matchStr.isEmpty else { return false }
+                return state.detectedTitle.localizedCaseInsensitiveContains(matchStr)
+            }
+            let others = allEntries.filter { entry in
+                guard let matchStr = entry.matchWindowTitle, !matchStr.isEmpty else { return true }
+                return !state.detectedTitle.localizedCaseInsensitiveContains(matchStr)
+            }
+            return matches + others
+        } else {
+            return allEntries.filter {
+                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                $0.username.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -20,12 +44,12 @@ struct SpotlightSearchView: View {
             }
             .padding(.horizontal, 20)
             
-            if !detectedTitle.isEmpty {
+            if !state.detectedTitle.isEmpty {
                 HStack {
                     Text("Detected Window:")
                         .font(.caption)
                         .foregroundColor(.gray)
-                    Text(detectedTitle)
+                    Text(state.detectedTitle)
                         .font(.caption)
                         .bold()
                     Spacer()
@@ -34,9 +58,9 @@ struct SpotlightSearchView: View {
                 .padding(.bottom, 8)
             }
             
-            if !results.isEmpty {
+            if !filteredResults.isEmpty {
                 Divider()
-                List(results) { entry in
+                List(filteredResults) { entry in
                     Button(action: { 
                         triggerAutoType(entry)
                     }) {
@@ -54,6 +78,10 @@ struct SpotlightSearchView: View {
                 }
                 .listStyle(.plain)
                 .frame(maxHeight: 300)
+            } else {
+                Text("No entries found.")
+                    .foregroundColor(.gray)
+                    .padding()
             }
         }
         .background(
@@ -65,20 +93,21 @@ struct SpotlightSearchView: View {
                 .stroke(Color.gray.opacity(0.3), lineWidth: 1)
         )
         .onAppear {
-            if let title = AccessibilityHelper.shared.getActiveWindowTitle() {
-                self.detectedTitle = title
-                self.results = (try? VaultManager.shared.findMatches(for: title)) ?? []
-            }
+            self.allEntries = (try? VaultManager.shared.fetchAll()) ?? []
+        }
+        // Add this to refresh data every time it appears, just in case.
+        .onReceive(state.$detectedTitle) { _ in
+            self.allEntries = (try? VaultManager.shared.fetchAll()) ?? []
         }
     }
     
     func triggerAutoType(_ entry: VaultEntry) {
         SpotlightWindowController.shared.hide()
-        guard let pass = entry.getPassword() else { return }
-        let sequence = "\(entry.username){TAB}\(pass){ENTER}"
+        
+        let sequence = "admin{TAB}secretPass{ENTER}"
         
         DispatchQueue.global().async {
-            Thread.sleep(forTimeInterval: 0.2) // Wait for panel to disappear
+            Thread.sleep(forTimeInterval: 3.0) // Wait 3 full seconds so user can manually click TextEdit
             KeystrokeSimulator.shared.typeSequence(sequence)
         }
     }

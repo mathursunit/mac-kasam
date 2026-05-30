@@ -10,7 +10,9 @@ class AccessibilityHelper {
     }
     
     func getActiveWindowTitle() -> String? {
-        guard let frontApp = NSWorkspace.shared.frontmostApplication else { return nil }
+        // Find the active app that is NOT us
+        let apps = NSWorkspace.shared.runningApplications
+        guard let frontApp = apps.first(where: { $0.isActive && $0.bundleIdentifier != Bundle.main.bundleIdentifier }) ?? NSWorkspace.shared.frontmostApplication else { return nil }
         let appElement = AXUIElementCreateApplication(frontApp.processIdentifier)
         
         var focusedWindow: CFTypeRef?

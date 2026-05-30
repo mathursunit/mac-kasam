@@ -26,8 +26,18 @@ class SpotlightPanel: NSPanel {
 class SpotlightWindowController: NSObject {
     static let shared = SpotlightWindowController()
     private var panel: SpotlightPanel?
+    private var previousApp: NSRunningApplication?
     
     func show() {
+        let apps = NSWorkspace.shared.runningApplications
+        previousApp = apps.first(where: { $0.isActive && $0.bundleIdentifier != Bundle.main.bundleIdentifier }) ?? NSWorkspace.shared.frontmostApplication
+        
+        if let title = AccessibilityHelper.shared.getActiveWindowTitle() {
+            SpotlightState.shared.detectedTitle = title
+        } else {
+            SpotlightState.shared.detectedTitle = "Unknown"
+        }
+        
         if panel == nil {
             let hostingView = NSHostingView(rootView: SpotlightSearchView())
             panel = SpotlightPanel(contentRect: NSRect(x: 0, y: 0, width: 600, height: 400))
@@ -41,5 +51,6 @@ class SpotlightWindowController: NSObject {
     
     func hide() {
         panel?.orderOut(nil)
+        // Don't auto-activate, let user manually click to perfectly replicate POC
     }
 }

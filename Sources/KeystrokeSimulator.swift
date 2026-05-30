@@ -11,6 +11,7 @@ class KeystrokeSimulator {
     }
     
     func typeSequence(_ sequence: String) {
+        NSSound.beep()
         let tokens = parseSequence(sequence)
         
         for token in tokens {
@@ -23,6 +24,7 @@ class KeystrokeSimulator {
                 Thread.sleep(forTimeInterval: Double(ms) / 1000.0)
             }
         }
+        NSSound.beep()
     }
     
     private func parseSequence(_ sequence: String) -> [Token] {
