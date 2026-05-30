@@ -1,14 +1,23 @@
 name: MacKasam
 options:
   bundleIdPrefix: com.sunitmathur
+packages:
+  KeyboardShortcuts:
+    url: https://github.com/sindresorhus/KeyboardShortcuts.git
+    from: 1.16.0
+  GRDB:
+    url: https://github.com/groue/GRDB.swift.git
+    from: 6.27.0
 targets:
   MacKasam:
     type: application
     platform: macOS
     deploymentTarget: "14.0"
     sources: [Sources]
+    dependencies:
+      - package: KeyboardShortcuts
+      - package: GRDB
     info:
       path: Info.plist
       properties:
         NSPrincipalClass: NSApplication
-        LSUIElement: false
